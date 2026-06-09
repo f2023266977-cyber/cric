@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="24" fill="#0f172a"/>
+  <circle cx="96" cy="82" r="60" fill="#1e293b" stroke="#4ade80" stroke-width="5"/>
+  <ellipse cx="96" cy="60" rx="30" ry="12" fill="#fbbf24" transform="rotate(-15,96,60)"/>
+  <rect x="91" y="40" width="10" height="50" rx="3" fill="#e2e8f0" transform="rotate(-15,96,40)"/>
+  <circle cx="96" cy="120" r="5" fill="#ef4444"/>
+  <text x="96" y="168" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" fill="#4ade80">CS</text>
+</svg>

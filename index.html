@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cricket Score Recorder</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ============= SETUP ============= -->
+  <div id="setup-screen">
+    <div class="setup-card">
+      <h1>Cricket Score Recorder</h1>
+
+      <div class="setup-teams">
+        <div class="setup-team">
+          <div class="form-group">
+            <label>Team A Name</label>
+            <input type="text" id="teamA-name" placeholder="e.g. India" value="Team A">
+          </div>
+          <div class="form-group">
+            <label>Batting Order</label>
+            <div id="teamA-players-container" class="player-inputs"></div>
+          </div>
+        </div>
+        <div class="setup-team">
+          <div class="form-group">
+            <label>Team B Name</label>
+            <input type="text" id="teamB-name" placeholder="e.g. Australia" value="Team B">
+          </div>
+          <div class="form-group">
+            <label>Batting Order</label>
+            <div id="teamB-players-container" class="player-inputs"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Overs per side</label>
+          <select id="overs-limit">
+            <option value="3">3 (T3)</option>
+            <option value="5">5 (T5)</option>
+            <option value="6">6 (T6)</option>
+            <option value="10">10</option>
+            <option value="20" selected>20 (T20)</option>
+            <option value="50">50 (ODI)</option>
+            <option value="999">Unlimited (Test)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Players per side</label>
+          <select id="team-size" onchange="generatePlayerInputs()">
+            <option value="5">5 vs 5</option>
+            <option value="6">6 vs 6</option>
+            <option value="7">7 vs 7</option>
+            <option value="8">8 vs 8</option>
+            <option value="9">9 vs 9</option>
+            <option value="10" selected>10 vs 10</option>
+            <option value="11">11 vs 11</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="startMatch()">Toss & Start Match</button>
+      <hr>
+      <button class="btn-secondary" onclick="showHistory()">View Past Matches</button>
+    </div>
+  </div>
+
+  <!-- ============= TOSS SCREEN ============= -->
+  <div id="toss-screen" class="hidden">
+    <div class="setup-card toss-card">
+      <h1>Toss</h1>
+      <p id="toss-info" style="color:#94a3b8;margin-bottom:16px;">Who won the toss?</p>
+      <button class="btn-primary" id="toss-teamA-btn" onclick="tossWon(0)">Team A</button>
+      <button class="btn-primary" id="toss-teamB-btn" onclick="tossWon(1)" style="margin-top:8px;">Team B</button>
+      <hr>
+      <button class="btn-secondary" onclick="backToSetup()">Back</button>
+    </div>
+  </div>
+
+  <!-- ============= CHOOSE INNINGS ============= -->
+  <div id="choose-innings-screen" class="hidden">
+    <div class="setup-card">
+      <h1 id="choose-title">Team A won the toss</h1>
+      <p style="color:#94a3b8;margin-bottom:16px;">Choose to bat or bowl first:</p>
+      <button class="btn-primary" onclick="chooseBat()">Bat First</button>
+      <button class="btn-primary" onclick="chooseBowl()" style="margin-top:8px;background:linear-gradient(135deg,#f97316,#ea580c);">Bowl First</button>
+    </div>
+  </div>
+
+  <!-- ============= SCORING SCREEN ============= -->
+  <div id="scoring-screen" class="hidden">
+    <header>
+      <h2 id="match-title">Team A vs Team B</h2>
+      <span id="innings-label" class="badge">1st Innings</span>
+    </header>
+
+    <!-- Scoreboard -->
+    <div class="scoreboard">
+      <div class="score-target" id="target-display"></div>
+      <div class="score-main">
+        <span id="score-display">0/0</span>
+      </div>
+      <div class="score-meta">
+        <span>Overs: <strong id="overs-display">0.0</strong></span>
+        <span>RR: <strong id="run-rate">0.00</strong></span>
+        <span>Req RR: <strong id="req-run-rate">-</strong></span>
+      </div>
+      <div class="score-batsman">
+        <span>BATTING: <strong id="batting-name">Team A</strong></span>
+        <span>BOWLING: <strong id="bowling-name">Team B</strong></span>
+      </div>
+    </div>
+
+    <!-- Extras Panel -->
+    <div class="extras-panel">
+      <span><strong>Extras:</strong></span>
+      <span>W: <span id="extras-wide">0</span></span>
+      <span>NB: <span id="extras-noball">0</span></span>
+      <span>B: <span id="extras-bye">0</span></span>
+      <span>LB: <span id="extras-legbye">0</span></span>
+      <span>Total: <span id="extras-total">0</span></span>
+      <span class="extras-penalty">Pen: <span id="extras-penalty">0</span></span>
+    </div>
+
+    <!-- Last Ball -->
+    <div id="last-ball" class="last-ball hidden"></div>
+
+    <!-- Batsmen Cards -->
+    <div id="batsmen-section">
+      <div class="section-header">
+        <span>Batsmen</span>
+        <button class="btn-switch" onclick="switchStrike()" title="Switch strike">Switch Strike</button>
+      </div>
+      <div id="batsmen-cards" class="player-cards"></div>
+    </div>
+
+    <!-- Bowler Card -->
+    <div id="bowler-section">
+      <div class="section-header">
+        <span>Bowler</span>
+        <button class="btn-change" onclick="showBowlerSelect()">Change</button>
+      </div>
+      <div id="bowler-card" class="player-cards"></div>
+    </div>
+
+    <!-- Ball-by-Ball Buttons -->
+    <div class="controls">
+      <div class="controls-label">Runs</div>
+      <div class="btn-grid">
+        <button class="btn-ball" onclick="scoreRuns(0)">0</button>
+        <button class="btn-ball" onclick="scoreRuns(1)">1</button>
+        <button class="btn-ball" onclick="scoreRuns(2)">2</button>
+        <button class="btn-ball" onclick="scoreRuns(3)">3</button>
+        <button class="btn-ball btn-four" onclick="scoreRuns(4)">4</button>
+        <button class="btn-ball btn-six" onclick="scoreRuns(6)">6</button>
+      </div>
+      <div class="controls-label">Extras & Wicket</div>
+      <div class="btn-grid extras-grid">
+        <button class="btn-extra btn-wide" onclick="scoreExtra('wide')">Wide</button>
+        <button class="btn-extra btn-noball" onclick="scoreExtra('noball')">No Ball</button>
+        <button class="btn-extra btn-bye" onclick="scoreExtra('bye')">Bye</button>
+        <button class="btn-extra btn-legbye" onclick="scoreExtra('legbye')">Leg Bye</button>
+        <button class="btn-wicket" onclick="selectWicketBatsman()">WICKET</button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn-undo" onclick="undoLastBall()" id="undo-btn" disabled>Undo</button>
+      <button class="btn-end" onclick="confirmEndInnings()">End Innings</button>
+      <button class="btn-danger" onclick="confirmReset()">Reset</button>
+    </div>
+
+    <!-- Bowling Figures -->
+    <div class="bowling-figures">
+      <div class="section-header"><span>Bowling Figures</span></div>
+      <div id="bowling-table"></div>
+    </div>
+
+    <!-- Ball History -->
+    <div class="history">
+      <h3>Commentary</h3>
+      <div id="ball-log" class="ball-log">
+        <p class="empty-msg">No balls bowled yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= SELECT BATSMAN (after wicket) ============= -->
+  <div id="wicket-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" onclick="closeWicketModal()">&times;</button>
+      <h3 id="wicket-modal-title">Who is out?</h3>
+      <div id="wicket-choices" class="modal-choices"></div>
+      <hr>
+      <h3>Next batsman</h3>
+      <div id="next-batsman-choices" class="modal-choices"></div>
+      <button class="btn-secondary" style="margin-top:10px;" onclick="closeWicketModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ============= SELECT BOWLER ============= -->
+  <div id="bowler-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" onclick="closeBowlerSelect()">&times;</button>
+      <h3>Select Bowler</h3>
+      <div id="bowler-choices" class="modal-choices"></div>
+      <button class="btn-secondary" style="margin-top:8px;" onclick="closeBowlerSelect()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ============= INNINGS SWITCH ============= -->
+  <div id="innings-switch-screen" class="hidden">
+    <div class="setup-card" style="text-align:center;">
+      <h1 style="color:#fbbf24;">End of 1st Innings</h1>
+      <div id="innings-summary" style="margin:20px 0;"></div>
+      <button class="btn-primary" onclick="startSecondInnings()">Start 2nd Innings</button>
+    </div>
+  </div>
+
+  <!-- ============= RESULT ============= -->
+  <div id="result-screen" class="hidden">
+    <div class="setup-card result-card">
+      <h1>Match Result</h1>
+      <div id="result-content"></div>
+      <button class="btn-primary" onclick="newMatch()">New Match</button>
+      <button class="btn-secondary" onclick="showHistory()" style="margin-top:8px;">View History</button>
+    </div>
+  </div>
+
+  <!-- ============= HISTORY ============= -->
+  <div id="history-screen" class="hidden">
+    <div class="setup-card">
+      <h1>Match History</h1>
+      <div id="match-history-list"></div>
+      <button class="btn-primary" onclick="backToSetup()">Back</button>
+      <button class="btn-danger" onclick="clearAllHistory()">Clear All History</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

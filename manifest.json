@@ -1,0 +1,27 @@
+{
+  "name": "Cricket Score Recorder",
+  "short_name": "Cricket Scorer",
+  "description": "Full-featured cricket scoring app with two innings, player tracking, and match history",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "categories": ["sports", "utilities"],
+  "lang": "en",
+  "scope": ".",
+  "icons": [
+    { "src": "icons/icon-48.svg",     "sizes": "48x48",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-72.svg",     "sizes": "72x72",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-96.svg",     "sizes": "96x96",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-128.svg",    "sizes": "128x128",   "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-144.svg",    "sizes": "144x144",   "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-152.svg",    "sizes": "152x152",   "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.svg",    "sizes": "192x192",   "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icons/icon-384.svg",    "sizes": "384x384",   "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg",    "sizes": "512x512",   "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": []
+}
